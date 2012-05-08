@@ -1,0 +1,66 @@
+EMAIL_NOTIFICATION = '{{config.admin_email}}'
+DEFAULT_FROM_EMAIL = '{{config.site_email}}'
+
+{{if boolify(debug)}}
+LOCAL_DEV = DEBUG
+THUMBNAIL_DEBUG = DEBUG
+{{if debug_toolbar_panels}}
+DEBUG_TOOLBAR_PANELS = (
+    {{join(listify(debug_toolbar_panels),"',\n    '","'","',")}}
+)
+{{endif}}
+{{if debug_toolbar_config}}
+DEBUG_TOOLBAR_CONFIG = {
+{{py:
+debug_toolbar_config_items = [
+    e.split('=', 1) for e in debug_toolbar_config.split()
+]
+}}
+    {{for key, value in debug_toolbar_config_items}}
+    '{{key}}': {{value}},
+    {{endfor}}
+}
+{{endif}}
+{{endif}}
+
+USE_L10N = True
+
+{{default shop_base = ''}}
+{{default custom_shipping_modules = ''}}
+{{default custom_tax_modules = ''}}
+{{default form_extenders = ''}}
+SATCHMO_SETTINGS = {
+    'SHOP_BASE': '{{shop_base}}',
+    'MULTISHOP': {{boolify(multishop)}},
+    {{if custom_shipping_modules }}
+    'CUSTOM_SHIPPING_MODULES': [
+        {{join(listify(custom_shipping_modules),"',\n        '","'","',")}}
+    ],
+    {{endif}}
+    {{if custom_tax_modules}}
+    'CUSTOM_TAX_MODULES': [
+        {{join(listify(custom_tax_modules),"',\n        '","'","',")}}
+    ]
+    {{endif}}
+}
+
+L10N_SETTINGS = {
+{{py:
+currencies = [
+    e.split() for e in l10n_currencies.splitlines() if e.strip() != ""
+]
+}}
+    'currency_formats': {
+        {{for currency in currencies}}
+        '{{currency[0]}}': {
+            'symbol': {{currency[1]}},
+            'positive' : {{currency[2]}},
+            'negative': {{currency[3]}},
+            'decimal' : {{currency[4]}}
+        },
+        {{endfor}}
+    },
+    'default_currency': '{{l10n_default_currency}}',
+    'show_admin_translations': {{boolify(l10n_show_translations)}},
+    'allow_translation_choice': {{boolify(l10n_choose_translations)}}
+}
